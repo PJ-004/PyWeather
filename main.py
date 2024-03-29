@@ -5,52 +5,84 @@ import tkinter.font as tkFont
 def fahr(celsius):
     return (9/5)*celsius + 32
 
-apiKey = "2d92543f7cf7d77281a4d0cb549e95e5"
-baseURL = "http://api.openweathermap.org/data/2.5/weather?"
+def search():
+    cityName = cityChoice.get()
+    response = requests.get(baseURL + "appid=" + apiKey + "&q=" + cityName)
+    weatherModule = response.json()
 
-window = tk.Tk()
-window.geometry("500x600")
-window.configure(bg="black")
+    if weatherModule['cod'] != '404' and weatherModule['cod'] != '400':
+        current = weatherModule["main"]
+        currentTemp = current["temp"]
+        currentPressure = current["pressure"]
+        currentHumidity = current["humidity"]
+        desc = weatherModule["weather"][0]["description"]
 
-font = tkFont.Font(size=23)
+        city.config(text=f'{cityName}')
+        temp.config(text=f'Current Temperature: {(currentTemp - 273.15):.2f} °C / {(fahr(currentTemp - 273.15)):.2f} °F')
+        pressure.config(text=f'Current Pressure: {currentPressure}')
+        humidity.config(text=f'Current Humidity: {currentHumidity}%')
+        description.config(text=f'{desc}')
 
-cityChoice = tk.Entry(window)
-cityName = cityChoice.get()
+    else:
+        city.config(text=f'{cityName} not found')
+        temp.config(text=f'Current Temperature: ')
+        pressure.config(text=f'Current Pressure: ')
+        humidity.config(text=f'Current Humidity: ')
+        description.config(text=f'')
 
-response = requests.get(baseURL + "appid=" + apiKey + "&q=" + cityName)
-weatherModule = response.json()
-print(weatherModule)
+def labelLoading():
+    global city, temp, pressure, humidity, description
 
-if weatherModule["cod"] != 404:
-    current = weatherModule["main"]
-    currentTemp = current["temp"]
-    currentPressure = current["pressure"]
-    currentHumidity = current["humidity"]
-    desc = weatherModule["weather"][0]["description"]
+    city = tk.Label(text=f'Please enter a city name in the field above', fg="white", bg="black")
+    city["font"] = font
+    city["justify"] = "left"
+    city.pack()
 
-city = tk.Label(text=f'{cityName}', fg="white", bg="black")
-city["font"] = font
-city["justify"] = "left"
-city.pack()
+    temp = tk.Label(text=f'Current Temperature: ', fg="white", bg="black")
+    temp["font"] = font
+    temp["justify"] = "left"
+    temp.pack()
 
-temp = tk.Label(text=f'Current Temperature: {(currentTemp - 273.15):.2f}/{(fahr(currentTemp - 273.15)):.2f}', fg="white", bg="black")
-temp["font"] = font
-temp["justify"] = "left"
-temp.pack()
+    pressure = tk.Label(text=f'Current Pressure: ', fg="white", bg="black")
+    pressure["font"] = font
+    pressure["justify"] = "left"
+    pressure.pack()
 
-pressure = tk.Label(text=f'Current Pressure: {currentPressure}', fg="white", bg="black")
-pressure["font"] = font
-pressure["justify"] = "left"
-pressure.pack()
+    humidity = tk.Label(text=f'Current Humidity: ', fg="white", bg="black")
+    humidity["font"] = font
+    humidity["justify"] = "left"
+    humidity.pack()
 
-humidity = tk.Label(text=f'Current Humidity: {currentHumidity}%', fg="white", bg="black")
-humidity["font"] = font
-humidity["justify"] = "left"
-humidity.pack()
+    description = tk.Label(text=f' ', fg="white", bg="black")
+    description["font"] = font
+    description["justify"] = "left"
+    description.pack()
 
-description = tk.Label(text=f'{desc}', fg="white", bg="black")
-description["font"] = font
-description["justify"] = "left"
-description.pack()
+    apiSource = tk.Label(text='Weather API provided by openweathermap', fg='white', bg='black')
+    apiSource.pack()
 
-window.mainloop()
+def main():
+    global cityName, cityChoice, apiKey, baseURL, font, searchButton
+
+    apiKey = "2d92543f7cf7d77281a4d0cb549e95e5"
+    baseURL = "http://api.openweathermap.org/data/2.5/weather?"
+
+    window = tk.Tk()
+    window.title('PyWeather - A Simple Weather App')
+    window.geometry("400x400")
+    window.configure(bg="black")
+
+    font = tkFont.Font(size=15)
+
+    cityChoice = tk.Entry(window)
+    cityChoice.pack()
+
+    searchButton = tk.Button(window, text='Search', command=search)
+    searchButton.pack()
+
+    labelLoading()
+
+    window.mainloop()
+
+if __name__ == '__main__':
+    main()

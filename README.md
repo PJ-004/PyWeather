@@ -1,2 +1,2 @@
 # PyWeather
-A Simple Weather App created to understand how to use api tools in Python
+A lightweight and minimal weather app that was created with Python
